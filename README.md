@@ -1,4 +1,4 @@
-# Peeko 1.2.1
+# Peeko 1.3.0
 
 A small Chrome extension for a calmer screen routine: adjustable focus intervals,
 adjustable distance breaks, configurable reminders, and a theme-matched animated companion.
@@ -15,6 +15,15 @@ adjustable distance breaks, configurable reminders, and a theme-matched animated
 
 Keep the extracted folder in place while the extension is installed. No Node.js,
 npm installation, account, API key, or server is required to use it.
+
+## New in version 1.3.0
+
+- Spidey is a red-and-blue spider again: eight grounded legs, no hanging thread,
+  and the same oval eyes and small highlights as the other animal companions.
+- Added **Night Fury** from _How to Train Your Dragon_, with a simple Toothless
+  companion: charcoal body, green eyes, rounded ear fins, and a small red tail fin.
+- Night Fury uses cool blue colours and a rounded dragon silhouette, distinct from
+  Batman's warm grey/gold palette, pointed ears, and broad angular wings.
 
 ## New in version 1.2.1
 
@@ -67,18 +76,19 @@ npm installation, account, API key, or server is required to use it.
 
 ## Themes
 
-| Theme | Original companion |
-| --- | --- |
-| Harry Potter | Hoot, a scarf-wearing owl |
-| Game of Thrones | Ember, a rounded dragon with small red wings |
-| Spider-Man | Spidey, a red-and-blue cat |
-| Batman | Bats, a little bat |
-| Iron Man | Bolt, a red-and-gold bear cub |
-| Captain America | Scout, a shield companion |
-| Black Panther | Onyx, a purple-accented panther |
-| Royal Amethyst | Luna, a lilac cat |
-| Royal Emerald | Clover, a green cat |
-| Royal Sapphire | Blue, a blue cat |
+| Theme                                 | Original companion                                              |
+| ------------------------------------- | --------------------------------------------------------------- |
+| Harry Potter                          | Hoot, a scarf-wearing owl                                       |
+| Game of Thrones                       | Ember, a rounded dragon with small red wings                    |
+| Spider-Man                            | Spidey, a red-and-blue spider with eight legs                   |
+| Batman                                | Bats, a little bat                                              |
+| Night Fury (How to Train Your Dragon) | Toothless, a charcoal dragon with green eyes and a red tail fin |
+| Iron Man                              | Bolt, a red-and-gold bear cub                                   |
+| Captain America                       | Scout, a shield companion                                       |
+| Black Panther                         | Onyx, a purple-accented panther                                 |
+| Royal Amethyst                        | Luna, a lilac cat                                               |
+| Royal Emerald                         | Clover, a green cat                                             |
+| Royal Sapphire                        | Blue, a blue cat                                                |
 
 Theme illustrations are original SVG artwork. This is an unofficial fan-inspired
 personal project and has no affiliation with the referenced franchises.
@@ -170,7 +180,7 @@ wake-up, repeated automatic cycles, font preference validation, upgrade migratio
 concurrent tab requests, reminder deduplication,
 and the service worker's browser API contract using mocked Chrome APIs.
 
-All 27 automated tests passed, including simulated pointer release, window focus loss,
+All 28 automated tests passed, including simulated pointer release, window focus loss,
 free positioning, the hidden-pet expand path, synchronized ring/digit updates,
 cross-tab visibility changes during dragging, and keyboard focus restoration. JavaScript syntax, package references, and font
 file integrity were checked. The redesigned companion artwork was rendered and
@@ -179,6 +189,7 @@ Live Chrome rendering, actual audio output, and drag interactions were not
 verified in the build environment because a usable browser binary was unavailable.
 
 Implementation references:
+
 - https://developer.chrome.com/docs/extensions/reference/api/alarms
 - https://developer.chrome.com/docs/extensions/reference/api/offscreen
 

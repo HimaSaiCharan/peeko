@@ -1,41 +1,288 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your space · Peeko</title><link rel="stylesheet" href="settings.css"></head>
-<body>
-<div class="shell">
-  <aside class="sidebar">
-    <a class="wordmark" href="#overview"><span class="brand-icon" data-icon="eye"></span><span>Peeko<span class="wordmark-dot">.</span></span></a>
-    <div class="eyebrow nav-label">YOUR LITTLE SANCTUARY</div>
-    <nav aria-label="Settings sections">
-      <a href="#overview" class="selected"><span data-icon="eye"></span>Overview</a>
-      <a href="#themes"><span data-icon="spark"></span>Themes & companions</a>
-      <a href="#routine"><span data-icon="settings"></span>Your routine</a>
-    </nav>
-    <div class="sidebar-note"><span class="tiny-star">✧</span><p>A small pause.<br>A softer kind of focus.</p><span>Made for your everyday.</span></div>
-    <div class="version">PEEKO <span>v1.2.1</span></div>
-  </aside>
-  <main>
-    <header class="topbar"><div><span class="live-dot"></span> YOUR PERSONAL EYE-BREAK COMPANION</div><button id="preview" class="outline-button"><span data-icon="play"></span>Try a reminder</button></header>
-    <section class="hero" id="overview">
-      <div class="hero-copy"><div class="eyebrow"><span class="little-line"></span> ROOM TO REFOCUS</div><h1>A little distance.<br><em>A clearer day.</em></h1><p>Big ideas deserve little breaks. Let your familiar<br class="desktop"> remind you to look up, look far, and come back fresh.</p><div class="rule"><span><b id="rule-minutes">20</b><small>MINUTES OF FOCUS</small></span><i>·</i><span><b>20</b><small>FEET INTO THE DISTANCE</small></span><i>·</i><span><b id="rule-seconds">20</b><small>SECONDS TO RESET</small></span></div><div class="hero-footer"><span class="mini-orbit">✦</span> A tiny companion. A habit that stays with you.</div></div>
-      <div class="preview-scene"><div class="scene-orbit orbit-one"></div><div class="scene-orbit orbit-two"></div><span class="scene-star star-one">✧</span><span class="scene-star star-two">✦</span><div id="panel-preview"></div><span class="preview-caption"><span class="live-dot"></span> YOUR LIVE COMPANION</span></div>
-    </section>
-    <section id="themes" class="themes-section">
-      <div class="section-title"><div><div class="eyebrow">A WORLD THAT FEELS LIKE YOU</div><h2>Choose your universe<span>.</span></h2></div><p>New colours. A new little friend.<br>Same gentle nudge to look away.</p></div>
-      <div class="theme-grid" id="theme-grid" role="group" aria-label="Choose a theme"></div>
-      <p class="theme-note">Playful, fan-inspired palettes with original little companions.</p>
-    </section>
-    <section id="routine">
-      <div class="section-title"><div><div class="eyebrow">YOUR DAY, YOUR PACE</div><h2>Make it your ritual<span>.</span></h2></div><span class="save-status" role="status" id="save-status">Changes save automatically</span></div>
-      <div class="settings-grid">
-        <article class="setting-card typography-card"><div class="card-title"><span data-icon="settings"></span><h3>Easy on the eyes</h3></div><p>Choose a font and reading size for your panel, companion, and settings.</p><div class="font-controls"><label for="font">Font style<select id="font"></select></label><label for="textSize">Text size<select id="textSize"><option value="comfortable">Comfortable</option><option value="large">Large · 115%</option><option value="extra">Extra large · 130%</option></select></label></div><div class="font-sample">A little distance. A clearer day.<span>20:00 · Your next break starts automatically.</span></div><p class="help">Roboto is included for offline use. Other choices use fonts installed on your device, with matching fallbacks.</p></article>
-        <article class="setting-card"><div class="card-title"><span data-icon="reset"></span><h3>Your rhythm</h3></div><p>Focus → automatic break → repeat. No start button needed.</p><div class="number-fields"><label for="minutes">Focus interval<div class="input-unit"><input id="minutes" type="number" min="1" max="180" step="1" required><span>min</span></div></label><label for="seconds">Break duration<div class="input-unit"><input id="seconds" type="number" min="5" max="300" step="1" required><span>sec</span></div></label></div><p class="help">1–180 minutes · 5–300 seconds. Changing the focus interval restarts its timer.</p><button id="reset" class="text-button">Restart this interval <span data-icon="arrow"></span></button></article>
-        <article class="setting-card"><div class="card-title"><span data-icon="spark"></span><h3>A sound to look up</h3></div><p>A little nudge, at just the right volume.</p><div class="sound-row"><label for="sound" class="sr-only">Reminder sound</label><select id="sound"><option value="buzzer">Soft buzzer</option><option value="chime">Gentle chime</option><option value="bell">Crystal bell</option><option value="silent">Silent</option></select><button id="test-sound" class="outline-button" aria-label="Preview reminder sound"><span data-icon="play"></span>Test</button></div><label class="range-label" for="volume">Volume <output id="volume-value">45%</output></label><input type="range" id="volume" min="0" max="100" step="1"><label class="toggle-row" for="notifications"><span>Desktop notifications</span><input type="checkbox" id="notifications" role="switch"></label></article>
-        <article class="setting-card"><div class="card-title"><span data-icon="settings"></span><h3>A corner of your own</h3></div><p>Choose where the panel opens. Drag its header to move it.</p><div class="position-picker" role="group" aria-label="Panel position"><button data-corner="top-left"><span class="corner-icon tl"></span>Top left</button><button data-corner="top-right"><span class="corner-icon tr"></span>Top right</button><button data-corner="bottom-left"><span class="corner-icon bl"></span>Bottom left</button><button data-corner="bottom-right"><span class="corner-icon br"></span>Bottom right</button></div><label class="toggle-row" for="snapToCorner"><span>Snap to nearest corner</span><input type="checkbox" id="snapToCorner" role="switch"></label><p class="help">The panel, pet, or compact bar snaps after you release it or leave the window. Turn this off to leave it anywhere.</p></article>
-        <article class="setting-card"><div class="card-title"><span data-icon="eye"></span><h3>Little companion, big personality</h3></div><p>Drag the companion or compact bar to move it.<br>Click it to bring your panel back.</p><label class="toggle-row" for="collapsed"><span>Collapse panel</span><input type="checkbox" id="collapsed" role="switch"></label><label class="toggle-row" for="showPet"><span>Show companion</span><input type="checkbox" id="showPet" role="switch"></label><label class="toggle-row" for="motion"><span>Let your companion hop</span><input type="checkbox" id="motion" role="switch"></label><p class="help">When the companion is hidden, a compact timer bar stays visible. Click it to expand.</p></article>
-      </div>
-    </section>
-    <footer class="page-footer"><span>Less screen. More scene.</span><p>Your preferences stay on this device. No accounts. No tracking.</p></footer>
-  </main>
-</div><div id="toast" role="status"></div>
-<script src="font-data.js"></script><script src="fonts.js"></script><script src="pets.js"></script><script src="themes.js"></script><script src="ui.js"></script><script src="settings.js"></script>
-</body></html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Your space · Peeko</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="wordmark" href="#overview"
+          ><span class="brand-icon" data-icon="eye"></span
+          ><span>Peeko<span class="wordmark-dot">.</span></span></a
+        >
+        <div class="eyebrow nav-label">YOUR LITTLE SANCTUARY</div>
+        <nav aria-label="Settings sections">
+          <a href="#overview" class="selected"
+            ><span data-icon="eye"></span>Overview</a
+          >
+          <a href="#themes"
+            ><span data-icon="spark"></span>Themes & companions</a
+          >
+          <a href="#routine"><span data-icon="settings"></span>Your routine</a>
+        </nav>
+        <div class="sidebar-note">
+          <span class="tiny-star">✧</span>
+          <p>A small pause.<br />A softer kind of focus.</p>
+          <span>Made for your everyday.</span>
+        </div>
+        <div class="version">PEEKO <span>v1.3.0</span></div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <div>
+            <span class="live-dot"></span> YOUR PERSONAL EYE-BREAK COMPANION
+          </div>
+          <button id="preview" class="outline-button">
+            <span data-icon="play"></span>Try a reminder
+          </button>
+        </header>
+        <section class="hero" id="overview">
+          <div class="hero-copy">
+            <div class="eyebrow">
+              <span class="little-line"></span> ROOM TO REFOCUS
+            </div>
+            <h1>A little distance.<br /><em>A clearer day.</em></h1>
+            <p>
+              Big ideas deserve little breaks. Let your familiar<br
+                class="desktop"
+              />
+              remind you to look up, look far, and come back fresh.
+            </p>
+            <div class="rule">
+              <span
+                ><b id="rule-minutes">20</b
+                ><small>MINUTES OF FOCUS</small></span
+              ><i>·</i
+              ><span><b>20</b><small>FEET INTO THE DISTANCE</small></span
+              ><i>·</i
+              ><span
+                ><b id="rule-seconds">20</b
+                ><small>SECONDS TO RESET</small></span
+              >
+            </div>
+            <div class="hero-footer">
+              <span class="mini-orbit">✦</span> A tiny companion. A habit that
+              stays with you.
+            </div>
+          </div>
+          <div class="preview-scene">
+            <div class="scene-orbit orbit-one"></div>
+            <div class="scene-orbit orbit-two"></div>
+            <span class="scene-star star-one">✧</span
+            ><span class="scene-star star-two">✦</span>
+            <div id="panel-preview"></div>
+            <span class="preview-caption"
+              ><span class="live-dot"></span> YOUR LIVE COMPANION</span
+            >
+          </div>
+        </section>
+        <section id="themes" class="themes-section">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">A WORLD THAT FEELS LIKE YOU</div>
+              <h2>Choose your universe<span>.</span></h2>
+            </div>
+            <p>
+              New colours. A new little friend.<br />Same gentle nudge to look
+              away.
+            </p>
+          </div>
+          <div
+            class="theme-grid"
+            id="theme-grid"
+            role="group"
+            aria-label="Choose a theme"
+          ></div>
+          <p class="theme-note">
+            Playful, fan-inspired palettes with original little companions.
+          </p>
+        </section>
+        <section id="routine">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">YOUR DAY, YOUR PACE</div>
+              <h2>Make it your ritual<span>.</span></h2>
+            </div>
+            <span class="save-status" role="status" id="save-status"
+              >Changes save automatically</span
+            >
+          </div>
+          <div class="settings-grid">
+            <article class="setting-card typography-card">
+              <div class="card-title">
+                <span data-icon="settings"></span>
+                <h3>Easy on the eyes</h3>
+              </div>
+              <p>
+                Choose a font and reading size for your panel, companion, and
+                settings.
+              </p>
+              <div class="font-controls">
+                <label for="font">Font style<select id="font"></select></label
+                ><label for="textSize"
+                  >Text size<select id="textSize">
+                    <option value="comfortable">Comfortable</option>
+                    <option value="large">Large · 115%</option>
+                    <option value="extra">Extra large · 130%</option>
+                  </select></label
+                >
+              </div>
+              <div class="font-sample">
+                A little distance. A clearer day.<span
+                  >20:00 · Your next break starts automatically.</span
+                >
+              </div>
+              <p class="help">
+                Roboto is included for offline use. Other choices use fonts
+                installed on your device, with matching fallbacks.
+              </p>
+            </article>
+            <article class="setting-card">
+              <div class="card-title">
+                <span data-icon="reset"></span>
+                <h3>Your rhythm</h3>
+              </div>
+              <p>Focus → automatic break → repeat. No start button needed.</p>
+              <div class="number-fields">
+                <label for="minutes"
+                  >Focus interval
+                  <div class="input-unit">
+                    <input
+                      id="minutes"
+                      type="number"
+                      min="1"
+                      max="180"
+                      step="1"
+                      required
+                    /><span>min</span>
+                  </div></label
+                ><label for="seconds"
+                  >Break duration
+                  <div class="input-unit">
+                    <input
+                      id="seconds"
+                      type="number"
+                      min="5"
+                      max="300"
+                      step="1"
+                      required
+                    /><span>sec</span>
+                  </div></label
+                >
+              </div>
+              <p class="help">
+                1–180 minutes · 5–300 seconds. Changing the focus interval
+                restarts its timer.
+              </p>
+              <button id="reset" class="text-button">
+                Restart this interval <span data-icon="arrow"></span>
+              </button>
+            </article>
+            <article class="setting-card">
+              <div class="card-title">
+                <span data-icon="spark"></span>
+                <h3>A sound to look up</h3>
+              </div>
+              <p>A little nudge, at just the right volume.</p>
+              <div class="sound-row">
+                <label for="sound" class="sr-only">Reminder sound</label
+                ><select id="sound">
+                  <option value="buzzer">Soft buzzer</option>
+                  <option value="chime">Gentle chime</option>
+                  <option value="bell">Crystal bell</option>
+                  <option value="silent">Silent</option></select
+                ><button
+                  id="test-sound"
+                  class="outline-button"
+                  aria-label="Preview reminder sound"
+                >
+                  <span data-icon="play"></span>Test
+                </button>
+              </div>
+              <label class="range-label" for="volume"
+                >Volume <output id="volume-value">45%</output></label
+              ><input
+                type="range"
+                id="volume"
+                min="0"
+                max="100"
+                step="1"
+              /><label class="toggle-row" for="notifications"
+                ><span>Desktop notifications</span
+                ><input type="checkbox" id="notifications" role="switch"
+              /></label>
+            </article>
+            <article class="setting-card">
+              <div class="card-title">
+                <span data-icon="settings"></span>
+                <h3>A corner of your own</h3>
+              </div>
+              <p>Choose where the panel opens. Drag its header to move it.</p>
+              <div
+                class="position-picker"
+                role="group"
+                aria-label="Panel position"
+              >
+                <button data-corner="top-left">
+                  <span class="corner-icon tl"></span>Top left</button
+                ><button data-corner="top-right">
+                  <span class="corner-icon tr"></span>Top right</button
+                ><button data-corner="bottom-left">
+                  <span class="corner-icon bl"></span>Bottom left</button
+                ><button data-corner="bottom-right">
+                  <span class="corner-icon br"></span>Bottom right
+                </button>
+              </div>
+              <label class="toggle-row" for="snapToCorner"
+                ><span>Snap to nearest corner</span
+                ><input type="checkbox" id="snapToCorner" role="switch"
+              /></label>
+              <p class="help">
+                The panel, pet, or compact bar snaps after you release it or
+                leave the window. Turn this off to leave it anywhere.
+              </p>
+            </article>
+            <article class="setting-card">
+              <div class="card-title">
+                <span data-icon="eye"></span>
+                <h3>Little companion, big personality</h3>
+              </div>
+              <p>
+                Drag the companion or compact bar to move it.<br />Click it to
+                bring your panel back.
+              </p>
+              <label class="toggle-row" for="collapsed"
+                ><span>Collapse panel</span
+                ><input type="checkbox" id="collapsed" role="switch" /></label
+              ><label class="toggle-row" for="showPet"
+                ><span>Show companion</span
+                ><input type="checkbox" id="showPet" role="switch" /></label
+              ><label class="toggle-row" for="motion"
+                ><span>Let your companion hop</span
+                ><input type="checkbox" id="motion" role="switch"
+              /></label>
+              <p class="help">
+                When the companion is hidden, a compact timer bar stays visible.
+                Click it to expand.
+              </p>
+            </article>
+          </div>
+        </section>
+        <footer class="page-footer">
+          <span>Less screen. More scene.</span>
+          <p>Your preferences stay on this device. No accounts. No tracking.</p>
+        </footer>
+      </main>
+    </div>
+    <div id="toast" role="status"></div>
+    <script src="font-data.js"></script>
+    <script src="fonts.js"></script>
+    <script src="pets.js"></script>
+    <script src="themes.js"></script>
+    <script src="ui.js"></script>
+    <script src="settings.js"></script>
+  </body>
+</html>
