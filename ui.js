@@ -1,5 +1,6 @@
 globalThis.FocusUI = (() => {
   const icons = {
+    close: '<path d="m6 6 12 12M18 6 6 18"/>',
     eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
     settings:
       '<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/>',
@@ -22,6 +23,7 @@ globalThis.FocusUI = (() => {
   .panel,.tiny-pet{font-family:var(--font,system-ui,sans-serif);font-size:calc(16px * var(--font-scale,1));line-height:1.5}
   *{box-sizing:border-box}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}button{border:0}svg{display:block}button:disabled{opacity:.55;cursor:wait}
   .panel{position:relative;width:360px;max-width:100%;padding:22px 22px 18px;background:var(--card);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:25px;color:var(--ink);box-shadow:0 16px 65px #22123921,0 3px 10px #2212390a;text-align:left}
+  .drag-handle{display:block;width:72px;height:24px;margin:-14px auto 4px;padding:0;background:transparent;border-radius:12px}.drag-handle:before{content:"";display:block;width:46px;height:5px;margin:auto;background:var(--muted);opacity:.5;border-radius:8px}.drag-handle:hover:before{background:var(--accent);opacity:1}
   .brand{display:flex;align-items:center;gap:8px;font-size:calc(17px * var(--font-scale,1));font-weight:750;letter-spacing:-.35px}.brand svg{color:var(--accent)}.head{display:flex;align-items:center;justify-content:space-between}.tools{display:flex;gap:3px}.icon-button{display:grid;place-items:center;background:none;color:var(--muted);width:36px;height:36px;border-radius:8px}.icon-button:hover{background:var(--soft);color:var(--ink)}
   .pet-edge{position:absolute;top:-88px;right:20px;width:108px;height:108px;z-index:2;pointer-events:none}.pet-edge svg{width:100%;height:100%;animation:hop 4.4s ease-in-out infinite;transform-origin:50% 100%}@keyframes hop{0%,45%,65%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(-5deg)}56%{transform:translateY(0) scale(1.07,.94)}60%{transform:translateY(-4px) rotate(3deg)}}
   .kicker{text-align:center;margin:23px 0 0;font-size:calc(14px * var(--font-scale,1));font-weight:750;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted)}.dial{position:relative;width:calc(190px * var(--font-scale,1));height:calc(190px * var(--font-scale,1));margin:11px auto 10px;display:grid;place-items:center}.dial>svg{position:absolute;inset:0;transform:rotate(-90deg);width:100%;height:100%}.track{stroke:var(--soft)}.progress{stroke:var(--accent);stroke-linecap:round;transition:none}.dial-content{text-align:center}.time{font-size:calc(50px * var(--font-scale,1));line-height:1.15;letter-spacing:-2px;font-weight:500;font-variant-numeric:tabular-nums}.dial-label{max-width:155px;line-height:1.35;font-size:calc(14px * var(--font-scale,1));color:var(--muted);margin-top:5px}.message{text-align:center;font-size:calc(16px * var(--font-scale,1));color:var(--muted);margin:5px 0 18px;line-height:1.6;min-height:38px}.message strong{font-weight:650;color:var(--ink)}
@@ -52,7 +54,11 @@ globalThis.FocusUI = (() => {
     root.innerHTML =
       "<style>" +
       css +
-      '</style><div class="pet-edge"></div><section class="panel" aria-label="Peeko eye-break timer"><header class="head"><div class="brand">' +
+      '</style><div class="pet-edge"></div><section class="panel" aria-label="Peeko eye-break timer">' +
+      (floating
+        ? '<button class="drag-handle" type="button" aria-label="Move Peeko widget. Drag or use arrow keys." title="Drag to move · Arrow keys to reposition"></button>'
+        : "") +
+      '<header class="head"><div class="brand">' +
       icon("eye") +
       'Peeko</div><div class="tools"><button class="icon-button" data-op="options" title="Customize your familiar" aria-label="Open settings">' +
       icon("settings") +
@@ -60,6 +66,8 @@ globalThis.FocusUI = (() => {
       (floating
         ? '<button class="icon-button" data-op="collapse" title="Collapse panel" aria-label="Collapse panel">' +
           icon("minus") +
+          '</button><button class="icon-button" data-op="hide" title="Hide widget on all websites. Show it again from the Peeko toolbar popup." aria-label="Hide widget on all websites">' +
+          icon("close") +
           "</button>"
         : "") +
       '</div></header><div class="kicker">YOUR NEXT EYE BREAK</div><div class="dial"><svg viewBox="0 0 180 180" aria-hidden="true"><circle class="track" cx="90" cy="90" r="80" fill="none" stroke-width="4"/><circle class="progress" cx="90" cy="90" r="80" fill="none" stroke-width="4" stroke-dasharray="502.655"/></svg><div class="dial-content"><div class="time" role="timer">20:00</div><div class="dial-label">break starts automatically</div></div></div><p class="message"></p><div class="actions"><button class="primary" data-op="main"></button><button class="secondary" data-op="skip" title="Skip and start a fresh interval">' +
@@ -71,6 +79,8 @@ globalThis.FocusUI = (() => {
       if (!op) return;
       try {
         if (op === "options") await send({ type: "options" });
+        else if (op === "hide")
+          update(await send({ type: "save", patch: { showWidget: false } }));
         else if (op === "collapse")
           await send({ type: "save", patch: { collapsed: true } });
         else

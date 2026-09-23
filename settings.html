@@ -28,7 +28,7 @@
           <p>A small pause.<br />A softer kind of focus.</p>
           <span>Made for your everyday.</span>
         </div>
-        <div class="version">PEEKO <span>v1.3.0</span></div>
+        <div class="version">PEEKO <span>v1.4.1</span></div>
       </aside>
       <main>
         <header class="topbar">
@@ -111,6 +111,21 @@
             >
           </div>
           <div class="settings-grid">
+            <article class="setting-card typography-card">
+              <div class="card-title">
+                <span data-icon="eye"></span>
+                <h3>Widget visibility</h3>
+              </div>
+              <label class="toggle-row" for="showWidget"
+                ><span>Show widget on websites</span
+                ><input type="checkbox" id="showWidget" role="switch"
+              /></label>
+              <p class="help">
+                Applies to all supported website tabs. Hiding the widget keeps
+                your timer and reminders running. Use the Peeko toolbar popup to
+                show it again.
+              </p>
+            </article>
             <article class="setting-card typography-card">
               <div class="card-title">
                 <span data-icon="settings"></span>
@@ -204,23 +219,17 @@
               </div>
               <label class="range-label" for="volume"
                 >Volume <output id="volume-value">45%</output></label
-              ><input
-                type="range"
-                id="volume"
-                min="0"
-                max="100"
-                step="1"
-              /><label class="toggle-row" for="notifications"
-                ><span>Desktop notifications</span
-                ><input type="checkbox" id="notifications" role="switch"
-              /></label>
+              ><input type="range" id="volume" min="0" max="100" step="1" />
             </article>
             <article class="setting-card">
               <div class="card-title">
                 <span data-icon="settings"></span>
                 <h3>A corner of your own</h3>
               </div>
-              <p>Choose where the panel opens. Drag its header to move it.</p>
+              <p>
+                Choose where the panel opens. Drag the top-center grip to move
+                it.
+              </p>
               <div
                 class="position-picker"
                 role="group"
@@ -260,13 +269,21 @@
               ><label class="toggle-row" for="showPet"
                 ><span>Show companion</span
                 ><input type="checkbox" id="showPet" role="switch" /></label
-              ><label class="toggle-row" for="motion"
+              ><label class="toggle-row" id="motion-control" for="motion"
                 ><span>Let your companion hop</span
-                ><input type="checkbox" id="motion" role="switch"
+                ><input
+                  type="checkbox"
+                  id="motion"
+                  role="switch"
+                  aria-describedby="motion-help"
               /></label>
+              <p class="help" id="motion-help" hidden>
+                Turn on “Show companion” to enable hopping. Your previous
+                hopping preference is remembered.
+              </p>
               <p class="help">
-                When the companion is hidden, a compact timer bar stays visible.
-                Click it to expand.
+                With the widget enabled, hiding the companion leaves a compact
+                timer bar when collapsed. Click it to expand.
               </p>
             </article>
           </div>

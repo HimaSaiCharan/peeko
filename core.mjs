@@ -3,6 +3,7 @@ export const DEFAULTS = Object.freeze({
   seconds: 20,
   theme: "amethyst",
   corner: "top-right",
+  showWidget: true,
   collapsed: false,
   showPet: true,
   petX: 1,
@@ -13,7 +14,6 @@ export const DEFAULTS = Object.freeze({
   sound: "buzzer",
   volume: 45,
   motion: true,
-  notifications: true,
   font: "roboto",
   textSize: "comfortable",
 });
@@ -57,10 +57,10 @@ export function settings(input = {}) {
   out.minutes = Math.round(out.minutes);
   out.seconds = Math.round(out.seconds);
   for (const k of [
+    "showWidget",
     "collapsed",
     "showPet",
     "motion",
-    "notifications",
     "snapToCorner",
   ])
     if (typeof input[k] === "boolean") out[k] = input[k];

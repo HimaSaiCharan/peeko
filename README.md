@@ -1,4 +1,4 @@
-# Peeko 1.3.0
+# Peeko 1.4.1
 
 A small Chrome extension for a calmer screen routine: adjustable focus intervals,
 adjustable distance breaks, configurable reminders, and a theme-matched animated companion.
@@ -15,6 +15,29 @@ adjustable distance breaks, configurable reminders, and a theme-matched animated
 
 Keep the extracted folder in place while the extension is installed. No Node.js,
 npm installation, account, API key, or server is required to use it.
+
+## New in version 1.4.1
+
+- Restored the v1.3 Spider-Man companion with eight slim blue legs and matching eyes.
+- The expanded website widget now moves only using its top-center grip. Focus
+  the grip and use arrow keys for keyboard positioning. Collapsed pets and bars
+  still drag directly, with no added handle.
+- The toolbar popup uses a compact timer and always-visible **Start/Pause** and
+  **Skip** controls. Start resumes a paused timer; Skip starts a fresh focus interval.
+- Removed desktop notification settings and the Chrome notifications permission.
+  Configurable sounds, timer visuals, and automatic breaks remain available.
+
+## New in version 1.4.0
+
+- Spidey now has a low, rounded body with eight curved supporting legs, inspired
+  by the supplied references. Its small oval eyes match the other companions.
+- Added **Show widget on websites** in the Chrome toolbar popup and settings.
+  The website panel's **×** button turns the same setting off across all tabs.
+- Hiding removes the panel, pet, and compact bar from websites. It keeps the
+  timer and reminders running, and preserves placement and collapsed state.
+  Use the toolbar popup or settings to show it again without refreshing tabs.
+- **Let your companion hop** is disabled and displayed off when **Show companion**
+  is off. The previous hopping preference returns when the companion is shown.
 
 ## New in version 1.3.0
 
@@ -40,10 +63,10 @@ npm installation, account, API key, or server is required to use it.
 
 - Renamed to **Peeko**, with a simple red-and-gold Iron Man robot companion.
 - Collapsing with the companion hidden leaves a draggable timer bar. Click to expand.
-- Drag the expanded panel by its header, or drag the collapsed pet/bar.
+- Drag the expanded panel by its top-center grip, or drag the collapsed pet/bar.
 - **Snap to nearest corner** is on by default. Snapping happens when you release a drag,
   cancel it, or leave the window. Turn it off to keep your chosen free position.
-- Arrow keys reposition the focused pet, bar, or panel name. With snapping on they
+- Arrow keys reposition the focused pet, bar, or panel grip. With snapping on they
   select corners; with snapping off they move in small steps (Shift moves further).
 - The countdown digits and progress ring now use the same deadline every animation
   frame, with no trailing CSS transition. Pause, resume, and reset apply immediately.
@@ -62,17 +85,17 @@ npm installation, account, API key, or server is required to use it.
 
 ## What you can customise
 
+- **Widget visibility:** globally show or hide website widgets from the popup or settings. The × on a website panel hides them everywhere. The popup and settings remain accessible.
 - **Font style:** Roboto, system sans-serif, Arial, Verdana, Trebuchet MS, Georgia, Times New Roman, or Courier New. Roboto is bundled for offline use; other choices use local fonts with matching fallbacks.
 - **Text size:** Comfortable, Large (115%), or Extra large (130%).
 - **Focus interval:** 1–180 minutes; default 20 minutes.
 - **Break duration:** 5–300 seconds; default 20 seconds.
 - **Sound:** soft buzzer (default), gentle chime, crystal bell, or silent.
 - **Volume:** 0–100%, with a Test button.
-- **Desktop notifications:** on/off. The operating system can suppress these in Do Not Disturb mode.
-- **Panel position:** choose an opening corner, or drag the header to move the open panel.
+- **Panel position:** choose an opening corner, or drag the top-center grip to move the open panel.
 - **Snap to nearest corner:** enable to dock on release or window focus loss; disable for free placement.
 - **Collapsed companion:** drag anywhere on the page; click or press Enter to expand into the selected corner. Arrow keys also move the focused companion.
-- **Companion visibility and hopping:** independently configurable. Hiding the companion replaces the collapsed pet with a compact Peeko timer bar. The interface also respects your system's reduced-motion preference.
+- **Companion visibility and hopping:** independently configurable. When the widget is enabled, hiding the companion replaces the collapsed pet with a compact Peeko timer bar. Hopping is disabled until the companion is shown again. The interface also respects your system's reduced-motion preference.
 
 ## Themes
 
@@ -80,7 +103,7 @@ npm installation, account, API key, or server is required to use it.
 | ------------------------------------- | --------------------------------------------------------------- |
 | Harry Potter                          | Hoot, a scarf-wearing owl                                       |
 | Game of Thrones                       | Ember, a rounded dragon with small red wings                    |
-| Spider-Man                            | Spidey, a red-and-blue spider with eight legs                   |
+| Spider-Man                            | Spidey, the v1.3 red-and-blue spider with eight slim legs       |
 | Batman                                | Bats, a little bat                                              |
 | Night Fury (How to Train Your Dragon) | Toothless, a charcoal dragon with green eyes and a red tail fin |
 | Iron Man                              | Bolt, a red-and-gold bear cub                                   |
@@ -128,6 +151,9 @@ with Chrome alarms providing recovery if the worker is suspended.
 4. Try **Pause**, **Resume**, and **Skip**.
 5. Switch themes, choose another corner, collapse the panel, and drag the pet.
 6. Open a second ordinary website tab; check that the same timer and preferences appear.
+7. Close the widget with ×. Both tabs should hide it. Turn **Show widget on websites**
+   back on in the toolbar popup; both tabs should restore it with the timer still running.
+8. Hide the companion in settings and verify the hopping switch is disabled.
 
 The preview is the live timer, so **Try a reminder** ends the current interval
 and starts a real break countdown. It can always be skipped.
@@ -154,7 +180,6 @@ reading the page's text, forms, browsing history, or credentials.
 - `storage`: remember your timer and preferences.
 - `alarms`: recover timer deadlines when the service worker is suspended.
 - `offscreen`: play a reminder even when the panel is closed.
-- `notifications`: show optional desktop reminders.
 - HTTP/HTTPS content-script access: show the floating panel on websites. Chrome
   may describe this as permission to read and change data on websites.
 
@@ -180,9 +205,10 @@ wake-up, repeated automatic cycles, font preference validation, upgrade migratio
 concurrent tab requests, reminder deduplication,
 and the service worker's browser API contract using mocked Chrome APIs.
 
-All 28 automated tests passed, including simulated pointer release, window focus loss,
+All 36 automated tests passed, including simulated pointer release, window focus loss,
 free positioning, the hidden-pet expand path, synchronized ring/digit updates,
-cross-tab visibility changes during dragging, and keyboard focus restoration. JavaScript syntax, package references, and font
+cross-tab visibility changes during dragging, keyboard focus restoration, global
+hide/show, popup save error recovery, the dependent hopping control, handle-only dragging, and popup Start/Pause/Skip actions. JavaScript syntax, package references, and font
 file integrity were checked. The redesigned companion artwork was rendered and
 visually inspected.
 Live Chrome rendering, actual audio output, and drag interactions were not

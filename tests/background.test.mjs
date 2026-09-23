@@ -11,7 +11,6 @@ const event = () => ({
 });
 const data = {},
   alarms = new Map(),
-  notifications = [],
   audio = [];
 let offscreen = false;
 globalThis.chrome = {
@@ -39,13 +38,6 @@ globalThis.chrome = {
     },
   },
   action: { async setBadgeText() {}, async setBadgeBackgroundColor() {} },
-  notifications: {
-    onClicked: event(),
-    async create(id, value) {
-      notifications.push({ id, ...value });
-    },
-    async clear() {},
-  },
   runtime: {
     onInstalled: event(),
     onStartup: event(),
@@ -73,10 +65,7 @@ const send = (message) =>
 test("service worker coordinates cross-tab commands, alarm recovery, and sound", async () => {
   let result = await send({ type: "get" });
   assert.equal(result.settings.minutes, 20);
-  await send({
-    type: "save",
-    patch: { sound: "silent", notifications: false },
-  });
+  await send({ type: "save", patch: { sound: "silent" } });
   await Promise.all([
     send({ type: "save", patch: { theme: "panther" } }),
     send({ type: "save", patch: { corner: "bottom-left" } }),
@@ -92,6 +81,20 @@ test("service worker coordinates cross-tab commands, alarm recovery, and sound",
   const selected = await send({ type: "get" });
   assert.equal(selected.settings.theme, "nightfury");
   assert.equal(selected.timer.deadline, before);
+  await send({ type: "save", patch: { showWidget: false } });
+  const hiddenTabs = await Promise.all([
+    send({ type: "get" }),
+    send({ type: "get" }),
+  ]);
+  assert.ok(
+    hiddenTabs.every(
+      (tab) =>
+        tab.settings.showWidget === false && tab.timer.deadline === before,
+    ),
+  );
+  await send({ type: "save", patch: { showWidget: true } });
+  assert.equal(data.settings.showWidget, true);
+  assert.equal(data.timer.deadline, before);
   data.timer = { ...fresh(data.settings), deadline: Date.now() - 100 };
   const replies = await Promise.all(
     Array.from({ length: 5 }, () => send({ type: "tick" })),
@@ -121,14 +124,13 @@ test("service worker coordinates cross-tab commands, alarm recovery, and sound",
   await send({ type: "action", action: "skip" });
   assert.equal(data.timer.phase, "work");
   assert.equal(data.timer.completed, 1);
-  await send({ type: "save", patch: { sound: "buzzer", notifications: true } });
+  await send({ type: "save", patch: { sound: "buzzer" } });
   data.timer.deadline = Date.now() - 1;
   await Promise.all([
     send({ type: "tick" }),
     send({ type: "tick" }),
     send({ type: "tick" }),
   ]);
-  assert.equal(notifications.length, 1);
   assert.equal(audio.length, 1);
   assert.equal(audio[0].sound, "buzzer");
   await send({ type: "action", action: "skip" });
