@@ -1,4 +1,4 @@
-# Peeko 1.4.1
+# Peeko 1.5.1
 
 A small Chrome extension for a calmer screen routine: adjustable focus intervals,
 adjustable distance breaks, configurable reminders, and a theme-matched animated companion.
@@ -15,6 +15,25 @@ adjustable distance breaks, configurable reminders, and a theme-matched animated
 
 Keep the extracted folder in place while the extension is installed. No Node.js,
 npm installation, account, API key, or server is required to use it.
+
+## New in version 1.5.1
+
+- Popup top spacing follows companion visibility, including changes from settings.
+- Removed Calm melody; existing selections fall back to Soft buzzer.
+- Sound names no longer include duration labels.
+
+## New in version 1.5.0
+
+- The popup now uses the same timer circle, numeral sizes, spacing, padding,
+  weights, and Resume/Pause/Skip icon buttons as the website widget. At larger
+  text sizes, the popup scrolls instead of shrinking the typography.
+- The settings preview includes the same grip, minimize, and close controls.
+  Minimize and close affect website widgets; the settings preview stays visible.
+  The preview grip shows where to drag the widget on a website.
+- Dropdowns have consistent left/right text padding and a separate inset chevron.
+- Added Soft ping (0.3 seconds), Two gentle notes (0.7 seconds), Warm chime
+  (2 seconds), and Calm melody (3 seconds). Use Test to hear any choice.
+- Longer sounds play through their final note before audio resources are closed.
 
 ## New in version 1.4.1
 
@@ -90,7 +109,7 @@ npm installation, account, API key, or server is required to use it.
 - **Text size:** Comfortable, Large (115%), or Extra large (130%).
 - **Focus interval:** 1–180 minutes; default 20 minutes.
 - **Break duration:** 5–300 seconds; default 20 seconds.
-- **Sound:** soft buzzer (default), gentle chime, crystal bell, or silent.
+- **Sound:** soft buzzer (default), gentle chime, crystal bell, soft ping, two gentle notes, warm chime, or silent. Choose a short tone or a longer chime.
 - **Volume:** 0–100%, with a Test button.
 - **Panel position:** choose an opening corner, or drag the top-center grip to move the open panel.
 - **Snap to nearest corner:** enable to dock on release or window focus loss; disable for free placement.
@@ -190,7 +209,7 @@ companions. There are no third-party runtime dependencies.
 
 - `core.mjs`: validated preferences and timer transitions.
 - `background.js`: shared timer, alarms, messaging, and notifications.
-- `offscreen.js`: locally generated reminder sounds using Web Audio.
+- `sounds.js`, `offscreen.js`: selectable sound definitions and local Web Audio playback.
 - `themes.js`, `pets.js`: palettes and original vector companions.
 - `fonts.js`, `font-data.js`: configurable typography and bundled Roboto font bytes.
 - `licenses/Roboto.txt`: Roboto attribution and Apache 2.0 licence.
@@ -205,10 +224,10 @@ wake-up, repeated automatic cycles, font preference validation, upgrade migratio
 concurrent tab requests, reminder deduplication,
 and the service worker's browser API contract using mocked Chrome APIs.
 
-All 36 automated tests passed, including simulated pointer release, window focus loss,
+All 39 automated tests passed, including simulated pointer release, window focus loss,
 free positioning, the hidden-pet expand path, synchronized ring/digit updates,
 cross-tab visibility changes during dragging, keyboard focus restoration, global
-hide/show, popup save error recovery, the dependent hopping control, handle-only dragging, and popup Start/Pause/Skip actions. JavaScript syntax, package references, and font
+hide/show, popup save error recovery, the dependent hopping control, handle-only dragging, shared Resume/Pause/Skip actions, settings preview controls, and full-length sound playback. JavaScript syntax, package references, and font
 file integrity were checked. The redesigned companion artwork was rendered and
 visually inspected.
 Live Chrome rendering, actual audio output, and drag interactions were not

@@ -44,7 +44,8 @@ globalThis.FocusUI = (() => {
       String(n % 60).padStart(2, "0")
     );
   };
-  function mount(root, { floating = false } = {}) {
+  function mount(root, { floating = false, preview = false } = {}) {
+    let actionBusy = false;
     let data,
       petId = "",
       lastDue = 0,
@@ -74,27 +75,50 @@ globalThis.FocusUI = (() => {
       icon("skip") +
       'Skip</button></div><footer class="foot"><span class="theme-label"></span><span class="completed"></span></footer><div class="error" role="status"></div></section>';
     const $ = (s) => root.querySelector(s);
+    if (preview) {
+      const grip = $(".drag-handle");
+      grip.tabIndex = -1;
+      grip.title = "Drag widgets by this handle on websites";
+      grip.setAttribute("aria-label", "Website drag handle preview");
+      $('[data-op="collapse"]').title = "Collapse widgets on websites";
+      $('[data-op="hide"]').title =
+        "Hide widgets on websites. This settings preview stays visible.";
+    }
     root.addEventListener("click", async (e) => {
       const op = e.target.closest("button")?.dataset.op;
       if (!op) return;
+      const timerAction = op === "main" || op === "skip";
+      if (timerAction && (!data || actionBusy)) return;
+      if (timerAction) {
+        actionBusy = true;
+        $(".primary").disabled = $(".secondary").disabled = true;
+      }
+      $(".error").textContent = "";
       try {
         if (op === "options") await send({ type: "options" });
         else if (op === "hide")
           update(await send({ type: "save", patch: { showWidget: false } }));
         else if (op === "collapse")
-          await send({ type: "save", patch: { collapsed: true } });
+          update(await send({ type: "save", patch: { collapsed: true } }));
         else
-          await send({
-            type: "action",
-            action:
-              op === "main"
-                ? data.timer.phase === "due"
-                  ? "start"
-                  : "pause"
-                : op,
-          });
+          update(
+            await send({
+              type: "action",
+              action:
+                op === "main"
+                  ? data.timer.phase === "due"
+                    ? "start"
+                    : "pause"
+                  : op,
+            }),
+          );
       } catch (err) {
         $(".error").textContent = err.message;
+      } finally {
+        if (timerAction) {
+          actionBusy = false;
+          $(".primary").disabled = $(".secondary").disabled = false;
+        }
       }
     });
     function paint(force = false) {

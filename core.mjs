@@ -67,7 +67,7 @@ export function settings(input = {}) {
   for (const [k, values] of Object.entries({
     theme: themeIds,
     corner: ["top-left", "top-right", "bottom-left", "bottom-right"],
-    sound: ["buzzer", "chime", "bell", "silent"],
+    sound: ["buzzer", "chime", "bell", "ping", "double", "warm", "silent"],
     font: [
       "roboto",
       "sans",

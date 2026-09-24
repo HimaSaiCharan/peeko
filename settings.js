@@ -18,6 +18,12 @@
       toast(error.message);
     }
   }
+  for (const sound of FocusSounds.choices) {
+    const option = document.createElement("option");
+    option.value = sound.id;
+    option.textContent = sound.name;
+    $("#sound").append(option);
+  }
   for (const font of FocusFonts.choices) {
     const option = document.createElement("option");
     option.value = font.id;
@@ -47,6 +53,7 @@
   }
   const preview = FocusUI.mount(
     $("#panel-preview").attachShadow({ mode: "open" }),
+    { floating: true, preview: true },
   );
   function update(data) {
     if (!data?.settings || data === state) return;

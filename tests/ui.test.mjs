@@ -487,6 +487,7 @@ function controlsHarness(script, patch = {}) {
     },
     FocusThemes: { themes: [], apply() {} },
     FocusFonts: { choices: [], apply() {} },
+    FocusSounds: { choices: [] },
   });
   vm.runInContext(source(script), context);
   app.update(data);
@@ -530,6 +531,17 @@ test("popup visibility switch saves both values, reflects external changes, and 
     h.doc.querySelector("#visibility-error").textContent,
     /Could not save/,
   );
+});
+
+test("popup reserves companion space only while the companion is visible", () => {
+  const h = controlsHarness("popup.js", { showPet: false });
+  assert.equal(h.doc.body.style.paddingTop, "14px");
+  h.setSettings({ showPet: true });
+  assert.equal(h.doc.body.style.paddingTop, "94px");
+  h.setSettings({ showWidget: false });
+  assert.equal(h.doc.body.style.paddingTop, "94px");
+  h.setSettings({ showPet: false });
+  assert.equal(h.doc.body.style.paddingTop, "14px");
 });
 
 test("settings visibility stays synchronized and hopping is disabled while the companion is hidden", async () => {
@@ -590,35 +602,123 @@ test("expanded widget only moves from the centered grip, not the header or panel
   assert.equal(h.saves.length, 1);
 });
 
-test("popup controls pause, start a paused timer, and skip without scrolling", async () => {
-  const h = controlsHarness("popup.js"),
-    primary = h.doc.querySelector("#toggle-timer"),
-    skip = h.doc.querySelector("#skip-timer");
-  assert.equal(primary.textContent, "Pause timer");
-  assert.equal(primary.disabled, false);
-  assert.equal(skip.disabled, false);
-  primary.fire("click");
+test("shared popup buttons have icons and resume, pause, skip, and recover from errors", async () => {
+  const nodes = element();
+  nodes.host = element();
+  let fail = false,
+    data = { settings: settings(), timer: fresh(settings()) };
+  const context = vm.createContext({
+    Date,
+    requestAnimationFrame() {
+      return 1;
+    },
+    cancelAnimationFrame() {},
+    chrome: {
+      runtime: {
+        async sendMessage(message) {
+          if (fail) throw new Error("Disconnected");
+          if (message.type === "action")
+            data = {
+              ...data,
+              timer: transition(data.timer, data.settings, message.action),
+            };
+          return data;
+        },
+      },
+      storage: { onChanged: { addListener() {}, removeListener() {} } },
+    },
+    FocusThemes: {
+      apply() {
+        return { label: "Hello", pet: "Spidey" };
+      },
+      pet() {
+        return "<svg/>";
+      },
+    },
+    FocusFonts: { apply() {} },
+  });
+  vm.runInContext(source("ui.js"), context);
+  const ui = context.FocusUI.mount(nodes);
   await new Promise(setImmediate);
-  assert.equal(h.data.timer.paused, true);
-  assert.equal(primary.textContent, "Start timer");
-  const remaining = h.data.timer.remaining;
-  primary.fire("click");
+  const click = async (op) => {
+    nodes.fire("click", {
+      target: {
+        closest() {
+          return { dataset: { op } };
+        },
+      },
+    });
+    await new Promise(setImmediate);
+  };
+  assert.match(nodes.querySelector(".primary").innerHTML, /<svg.*Pause timer/);
+  await click("main");
+  assert.equal(ui.data.timer.paused, true);
+  assert.match(nodes.querySelector(".primary").innerHTML, /<svg.*Resume timer/);
+  const remaining = ui.data.timer.remaining;
+  await click("main");
+  assert.equal(ui.data.timer.paused, false);
+  assert.ok(ui.data.timer.deadline - Date.now() <= remaining);
+  await click("skip");
+  assert.equal(ui.data.timer.phase, "work");
+  assert.equal(ui.data.timer.paused, false);
+  fail = true;
+  await click("main");
+  assert.match(nodes.querySelector(".error").textContent, /Disconnected/);
+  assert.equal(nodes.querySelector(".primary").disabled, false);
+  assert.equal(nodes.querySelector(".secondary").disabled, false);
+  ui.destroy();
+});
+
+test("settings preview includes widget controls and applies collapse and close to website preferences", async () => {
+  const nodes = element();
+  nodes.host = element();
+  let data = { settings: settings(), timer: fresh(settings()) };
+  const context = vm.createContext({
+    Date,
+    requestAnimationFrame() {
+      return 1;
+    },
+    cancelAnimationFrame() {},
+    chrome: {
+      runtime: {
+        async sendMessage(message) {
+          if (message.type === "save")
+            data = {
+              ...data,
+              settings: { ...data.settings, ...message.patch },
+            };
+          return data;
+        },
+      },
+      storage: { onChanged: { addListener() {}, removeListener() {} } },
+    },
+    FocusThemes: {
+      apply() {
+        return { label: "Hello", pet: "Spidey" };
+      },
+      pet() {
+        return "<svg/>";
+      },
+    },
+    FocusFonts: { apply() {} },
+  });
+  vm.runInContext(source("ui.js"), context);
+  const ui = context.FocusUI.mount(nodes, { floating: true, preview: true });
   await new Promise(setImmediate);
-  assert.equal(h.data.timer.paused, false);
-  assert.equal(primary.textContent, "Pause timer");
-  assert.ok(h.data.timer.deadline - Date.now() <= remaining);
-  skip.fire("click");
-  await new Promise(setImmediate);
-  assert.equal(h.messages.at(-1).action, "skip");
-  assert.equal(h.data.timer.phase, "work");
-  assert.equal(h.data.timer.paused, false);
-  h.fail();
-  primary.fire("click");
-  await new Promise(setImmediate);
-  assert.match(
-    h.doc.querySelector("#timer-error").textContent,
-    /Could not update/,
-  );
-  assert.equal(primary.disabled, false);
-  assert.equal(skip.disabled, false);
+  assert.match(nodes.innerHTML, /class="drag-handle"/);
+  assert.match(nodes.innerHTML, /data-op="collapse"/);
+  assert.match(nodes.innerHTML, /data-op="hide"/);
+  for (const op of ["collapse", "hide"]) {
+    nodes.fire("click", {
+      target: {
+        closest() {
+          return { dataset: { op } };
+        },
+      },
+    });
+    await new Promise(setImmediate);
+  }
+  assert.equal(ui.data.settings.collapsed, true);
+  assert.equal(ui.data.settings.showWidget, false);
+  ui.destroy();
 });
