@@ -11,7 +11,7 @@
   const style = document.createElement("style");
   style.textContent = `
     .panel{max-width:100%;max-height:calc(100vh - 128px);overflow-y:auto;overscroll-behavior:contain}
-    .pet-edge{z-index:1}.drag-handle{cursor:grab;touch-action:none;user-select:none}.drag-handle:active{cursor:grabbing}
+    .pet-edge{z-index:1;pointer-events:auto;user-select:none}.drag-handle{cursor:grab;touch-action:none;user-select:none}.drag-handle:active{cursor:grabbing}
     .compact{width:190px;max-width:100%;height:48px;flex-direction:row;justify-content:space-around;gap:8px;padding:10px 12px;border-radius:16px}
     .compact .bar-name{font-size:calc(14px * var(--font-scale,1));font-weight:700}.compact svg{width:18px;height:18px;animation:none;flex-shrink:0}
     @media(max-height:650px){.dial{height:130px;width:130px}.time{font-size:calc(30px * var(--font-scale,1))}.dial-label{max-width:115px;font-size:14px}.kicker{margin-top:10px}.message{margin-bottom:10px}.panel{padding:15px}.foot{margin-top:10px;padding-top:8px}}
@@ -20,6 +20,20 @@
   const panel = root.querySelector(".panel"),
     edge = root.querySelector(".pet-edge"),
     grip = root.querySelector(".drag-handle");
+  // The expanded companion owns its hit area, without becoming a drag handle.
+  // Keep its clicks away from the webpage's delegated event handlers too.
+  for (const event of [
+    "pointerdown",
+    "pointerup",
+    "mousedown",
+    "mouseup",
+    "click",
+    "dblclick",
+    "auxclick",
+    "contextmenu",
+  ]) {
+    edge.addEventListener(event, (e) => e.stopPropagation());
+  }
   const pet = document.createElement("button");
   pet.className = "tiny-pet";
   pet.style.display = "none";

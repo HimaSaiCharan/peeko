@@ -1,6 +1,6 @@
 {
   "name": "peeko",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "private": true,
   "type": "module",
   "description": "A dependency-free Chrome extension for adjustable 20-20-20 reminders.",

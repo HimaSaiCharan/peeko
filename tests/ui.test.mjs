@@ -602,6 +602,42 @@ test("expanded widget only moves from the centered grip, not the header or panel
   assert.equal(h.saves.length, 1);
 });
 
+test("expanded companion intercepts clicks without dragging or changing the timer", () => {
+  const h = contentHarness({ showPet: true, collapsed: false }),
+    edge = h.root.querySelector(".pet-edge");
+  const before = h.host.getBoundingClientRect();
+  assert.equal(edge.style.display, "block");
+  for (const type of [
+    "pointerdown",
+    "pointerup",
+    "mousedown",
+    "mouseup",
+    "click",
+    "dblclick",
+    "auxclick",
+    "contextmenu",
+  ]) {
+    let stopped = false;
+    edge.fire(type, {
+      button: 0,
+      pointerId: 1,
+      clientX: 200,
+      clientY: 100,
+      stopPropagation() {
+        stopped = true;
+      },
+    });
+    assert.equal(stopped, true, type);
+  }
+  assert.deepEqual(h.host.getBoundingClientRect(), before);
+  assert.equal(h.saves.length, 0);
+  assert.equal(edge.capture, undefined);
+  h.setSettings({ showPet: false });
+  assert.equal(edge.style.display, "none");
+  h.setSettings({ showPet: true, collapsed: true });
+  assert.equal(edge.style.display, "none");
+});
+
 test("shared popup buttons have icons and resume, pause, skip, and recover from errors", async () => {
   const nodes = element();
   nodes.host = element();

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Peeko \u2014 20\u00b720\u00b720",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "A little distance. A clearer day. Eye-break reminders with personal themes and a playful companion.",
   "minimum_chrome_version": "116",
   "permissions": ["storage", "alarms", "offscreen"],

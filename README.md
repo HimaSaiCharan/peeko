@@ -1,4 +1,4 @@
-# Peeko 1.5.1
+# Peeko 1.5.2
 
 A small Chrome extension for a calmer screen routine: adjustable focus intervals,
 adjustable distance breaks, configurable reminders, and a theme-matched animated companion.
@@ -15,6 +15,11 @@ adjustable distance breaks, configurable reminders, and a theme-matched animated
 
 Keep the extracted folder in place while the extension is installed. No Node.js,
 npm installation, account, API key, or server is required to use it.
+
+## New in version 1.5.2
+
+- Restored the settings preview’s original 2° tilt, with the existing flat layout on narrow screens.
+- The expanded website companion blocks clicks on content behind it. Dragging still uses the handle.
 
 ## New in version 1.5.1
 
