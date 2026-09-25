@@ -88,7 +88,8 @@ globalThis.FocusUI = (() => {
       const op = e.target.closest("button")?.dataset.op;
       if (!op) return;
       const timerAction = op === "main" || op === "skip";
-      if (timerAction && (!data || actionBusy)) return;
+      if (timerAction && (!data || actionBusy || data.timer.systemPaused))
+        return;
       if (timerAction) {
         actionBusy = true;
         $(".primary").disabled = $(".secondary").disabled = true;
@@ -117,7 +118,8 @@ globalThis.FocusUI = (() => {
       } finally {
         if (timerAction) {
           actionBusy = false;
-          $(".primary").disabled = $(".secondary").disabled = false;
+          $(".primary").disabled = $(".secondary").disabled =
+            !!data?.timer.systemPaused;
         }
       }
     });
@@ -169,20 +171,24 @@ globalThis.FocusUI = (() => {
         $(".pet-edge").innerHTML = FocusThemes.pet(s.theme);
         petId = s.theme;
       }
-      $(".kicker").textContent = t.paused
-        ? "A MOMENT ON PAUSE"
-        : t.phase === "due"
-          ? "TIME TO LOOK AWAY"
-          : t.phase === "break"
-            ? "LET YOUR EYES WANDER"
-            : "YOUR NEXT EYE BREAK";
-      $(".dial-label").textContent = t.paused
-        ? "ready when you are"
-        : t.phase === "due"
-          ? "seconds of a wider view"
-          : t.phase === "break"
-            ? "look 20 feet away"
-            : "break starts automatically";
+      $(".kicker").textContent = t.systemPaused
+        ? "SCREEN LOCKED"
+        : t.paused
+          ? "A MOMENT ON PAUSE"
+          : t.phase === "due"
+            ? "TIME TO LOOK AWAY"
+            : t.phase === "break"
+              ? "LET YOUR EYES WANDER"
+              : "YOUR NEXT EYE BREAK";
+      $(".dial-label").textContent = t.systemPaused
+        ? "fresh focus on unlock"
+        : t.paused
+          ? "ready when you are"
+          : t.phase === "due"
+            ? "seconds of a wider view"
+            : t.phase === "break"
+              ? "look 20 feet away"
+              : "break starts automatically";
       $(".message").innerHTML =
         t.phase === "due"
           ? "<strong>Your little reset is ready.</strong><br>Find something at least 20 feet away."
@@ -197,13 +203,17 @@ globalThis.FocusUI = (() => {
               " sec of distance";
       $(".primary").innerHTML =
         icon(t.phase === "due" || t.paused ? "play" : "pause") +
-        (t.phase === "due"
-          ? "Start my break"
-          : t.paused
-            ? "Resume timer"
-            : t.phase === "break"
-              ? "Pause break"
-              : "Pause timer");
+        (t.systemPaused
+          ? "Screen locked"
+          : t.phase === "due"
+            ? "Start my break"
+            : t.paused
+              ? "Resume timer"
+              : t.phase === "break"
+                ? "Pause break"
+                : "Pause timer");
+      $(".primary").disabled = $(".secondary").disabled =
+        actionBusy || !!t.systemPaused;
       $(".theme-label").innerHTML =
         '<i class="status-dot"></i>' + theme.pet + " is with you";
       $(".completed").textContent =

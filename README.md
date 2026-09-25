@@ -1,4 +1,4 @@
-# Peeko 1.5.2
+# Peeko 1.8.0
 
 A small Chrome extension for a calmer screen routine: adjustable focus intervals,
 adjustable distance breaks, configurable reminders, and a theme-matched animated companion.
@@ -15,6 +15,40 @@ adjustable distance breaks, configurable reminders, and a theme-matched animated
 
 Keep the extracted folder in place while the extension is installed. No Node.js,
 npm installation, account, API key, or server is required to use it.
+
+## New in version 1.8.0
+
+- Keep the lock/unlock reset and add a fresh-focus reset after more than 2 minutes
+  between successful timer checks. Exactly 2 minutes does not trigger this rule.
+- Save the check timestamp with the timer transition, so multiple tabs and queued
+  alarms trigger only one reset per gap. Worker restarts retain that timestamp.
+- A lock takes priority: stay paused while locked, then reset on unlock. Manual
+  pauses survive gaps. Interrupted breaks are discarded without counting or sound.
+- Fixed queued alarm callbacks accidentally receiving an earlier command result
+  as a presence state; alarm checks now query the actual Chrome lock state.
+- Gap resets are a deliberate heuristic: delayed Chrome checks can cause an
+  unwanted reset while awake. They are not confirmation that sleep occurred.
+
+## New in version 1.7.0 (historical; gap behavior superseded by 1.8.0)
+
+- A reported screen lock pauses the timer; an observed unlock starts a full focus
+  interval using your configured duration. Interrupted breaks are not counted.
+- Removed the 45-second sleep guess. Delayed checks and ordinary inactivity never
+  reset or extend the timer. A 30-second alarm still checks the actual lock state
+  and processes due timers; it no longer estimates sleep.
+- Manual pauses remain paused. All tabs share one reset per detected lock/unlock.
+- The panel labels automatic lock pauses and disables timer controls until unlock.
+- Feedback link, preview tilt, pets, and previous layout fixes remain included.
+
+## New in version 1.6.0 (historical; timer behavior superseded by 1.7.0)
+
+- Added **Feedback & report a bug** to the settings sidebar. Opens the supplied
+  Google Form in a separate tab: https://forms.gle/SZBmCVxhW49zpwi26
+- Automatically pauses focus and break countdowns when Chrome reports a locked
+  screen (or screensaver), then resumes the saved remainder when unlocked.
+- A timer paused manually stays paused after unlocking.
+- Added persisted awake checkpoints to recover from sleep without a lock event.
+- Requires Chrome 120+ for the 30-second recovery alarm, and the `idle` permission.
 
 ## New in version 1.5.2
 
@@ -160,12 +194,65 @@ Changing the focus interval restarts the current work interval while preserving
 an intentional pause. Changing break duration applies to the next break.
 The local daily break counter counts finished break countdowns, not skipped reminders. It cannot determine whether you actually looked away.
 
-Fully restarting Chrome starts a new focus interval unless you had paused the
-timer. Sleeping your computer or suspended browser processes can delay reminders;
-on recovery, the extension reconciles the stored deadline once instead of
-playing a backlog of buzzers. Short break countdowns update against an absolute
-timestamp. Foreground UI updates and a short worker timer handle completion,
-with Chrome alarms providing recovery if the worker is suspended.
+The running timer stores an absolute deadline (`Date.now() + remaining`). The
+popup, settings preview, and all website widgets calculate `deadline - Date.now()`
+for the countdown and progress ring. A single service worker serializes commands,
+changes phases, and plays sounds. Chrome alarms and foreground updates reconcile
+the same stored timer, preventing duplicate reminders.
+
+When Chrome reports a screen lock (including a screensaver reported as locked),
+Peeko saves the remaining time for the paused display, clears the deadline alarm,
+and marks the pause as automatic. When Chrome subsequently reports `active` or
+`idle` (unlocked), Peeko discards the interrupted countdown and starts a fresh
+focus interval. Unlocking does not play a reminder. Repeated unlocked checks do
+not reset again. Manual pauses have no automatic marker and remain paused.
+
+The extension listens for `chrome.idle.onStateChanged` and also queries the
+current state on timer checks. It does not require mouse input after unlock:
+`idle` also means unlocked. An unknown state does not clear an automatic pause.
+The 30-second recovery alarm remains. Each successful timer check records a
+persistent `timerCheckedAt` timestamp. If an unlocked, running timer goes more
+than 120,000 ms without a check, the next check starts fresh focus before processing
+any overdue reminder. Exactly 120,000 ms is tolerated. Alarms, UI requests, and
+reported presence changes all run this check. One stored transition and checkpoint
+prevent queued requests from repeatedly resetting the same gap. Old v1.6
+`presenceCheckedAt` values are ignored; installing/updating establishes a new
+baseline. Missing, invalid or future checkpoints do not trigger a gap reset.
+
+| Situation                                                            | Behavior                                                                                                                                   |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Browser untouched, minimized, background tabs, or another app in use | Countdown and reminders continue while Chrome is running and the computer can execute them.                                                |
+| No mouse/keyboard input; computer awake and unlocked                 | Continue, even if Chrome reports `idle`, as long as check gaps stay within 2 minutes.                                                      |
+| Screen lock detected                                                 | Pause either phase; no new timer reminders while the lock is observed. An already-playing tone is not stopped.                             |
+| Unlock after an automatic pause                                      | Start one full focus interval using the latest configured duration.                                                                        |
+| Lock during a break                                                  | On unlock, discard that break without adding it to the completed count.                                                                    |
+| Timer manually paused before locking                                 | Keep the same phase and remaining time paused after unlock.                                                                                |
+| A gap of more than 2 minutes, with no recorded lock                  | Start full focus silently, discarding an interrupted break without counting it. A manual pause stays paused.                               |
+| A check gap of 2 minutes or less                                     | Preserve the running deadline; ordinary timer transitions still apply.                                                                     |
+| Timer overdue, with no lock and no qualifying gap                    | A focus phase starts one full break and its sound; an overdue break completes once and starts focus. No replay of every missed cycle.      |
+| A late check finds the machine still locked                          | Apply the lock pause before processing an overdue timer, suppressing its reminder.                                                         |
+| Multiple tabs or repeated unlock checks                              | One shared transition and deadline, with no repeated reset or duplicate sound.                                                             |
+| Focus duration edited during an automatic pause                      | Stay paused; use the new duration on unlock.                                                                                               |
+| Theme, pet, widget visibility, fonts, position changes               | Those settings do not themselves reset or resume the timer; their request still processes any pre-existing gap or lock transition.         |
+| Day changes while locked                                             | Start fresh focus on unlock; daily completed count resets to zero.                                                                         |
+| Browser fully restarted                                              | Existing behavior: running timers start fresh focus. Manual pauses remain paused; automatic pauses wait for an unlocked state, then reset. |
+| Extension updated while a v1.6 automatic pause is saved              | The saved pause uses the new fresh-focus behavior on unlock.                                                                               |
+
+Chrome does not expose a direct lid-close/suspend event to ordinary extensions.
+A reported lock/unlock or a check gap over 2 minutes now triggers a reset. A short
+sleep without a recorded lock may not create a large enough gap; in that case
+sleep counts as elapsed wall-clock time and an overdue timer follows the normal
+phase transition. Display sleep alone does not trigger a reset if checks continue.
+
+The gap rule is an accepted trade-off: Chrome may delay checks while the computer
+is awake, causing an unwanted reset. Frequent locks or long check gaps can postpone
+reminders. Ordinary browser inactivity is not itself a pause signal. Clock
+adjustments can change the countdown; a forward clock jump can also create an
+apparent gap. Chrome must be running, and alarms cannot play while the computer
+is asleep or the browser is fully closed. A gap reset is silent and does not replay
+missed reminders. An already-playing tone is not stopped by a lock or gap reset.
+Short breaks use foreground updates and a short worker timeout, with Chrome
+alarms providing recovery when the worker is suspended.
 
 ## Quick check after installation
 
@@ -178,6 +265,16 @@ with Chrome alarms providing recovery if the worker is suspended.
 7. Close the widget with ×. Both tabs should hide it. Turn **Show widget on websites**
    back on in the toolbar popup; both tabs should restore it with the timer still running.
 8. Hide the companion in settings and verify the hopping switch is disabled.
+9. Let focus count down, lock the screen, then unlock. Confirm it starts at the
+   configured full duration. Wait a minute: it should count down without resetting
+   again. Repeat during a break: unlock must start focus, with no extra completed break.
+10. Repeat after manually pausing: it must stay paused. Leave Chrome untouched while
+    working in another app: the timer must continue. Test lid closure separately;
+    reset is expected after a recorded lock/unlock or more than 2 minutes between
+    checks. A shorter unreported sleep may leave the timer overdue and start a break.
+    Try again during a break and while manually paused: a gap discards the former
+    without counting it, but preserves the latter.
+11. Open **Feedback & report a bug** in settings and confirm the form opens.
 
 The preview is the live timer, so **Try a reminder** ends the current interval
 and starts a real break countdown. It can always be skipped.
@@ -189,21 +286,23 @@ and starts a real break countdown. It can always be skipped.
   Use the toolbar popup on those pages. Local file pages are not included.
 - This is an in-page panel and companion, not an operating-system desktop widget.
 - Existing tabs need a refresh after installing, updating, or reloading the extension.
-- The timer follows wall-clock time while Chrome is running, including time spent
-  in other apps. Use Pause when you do not want reminders.
+- While awake and unlocked, the timer follows wall-clock time, including time spent
+  in other apps. A recorded lock pauses it; unlock or a check gap over 2 minutes starts fresh focus.
 - Moving the system clock can change countdowns. Chrome may delay alarms during
   sleep or heavy throttling; second-perfect background timing is not guaranteed.
 
 ## Privacy and permissions
 
 No analytics, remote code, external images, font downloads, accounts, or network
-requests are used. Preferences and timer state are saved only in Chrome's local
+requests are used by the extension itself. The feedback link opens an external
+Google Form only when you click it. Preferences and timer state are saved only in Chrome's local
 extension storage. The content script draws its own isolated interface without
 reading the page's text, forms, browsing history, or credentials.
 
 - `storage`: remember your timer and preferences.
 - `alarms`: recover timer deadlines when the service worker is suspended.
 - `offscreen`: play a reminder even when the panel is closed.
+- `idle`: detect system lock/unlock locally; this information is not sent anywhere.
 - HTTP/HTTPS content-script access: show the floating panel on websites. Chrome
   may describe this as permission to read and change data on websites.
 
@@ -213,7 +312,8 @@ The extension uses plain JavaScript, HTML, CSS, Manifest V3, and original SVG
 companions. There are no third-party runtime dependencies.
 
 - `core.mjs`: validated preferences and timer transitions.
-- `background.js`: shared timer, alarms, messaging, and notifications.
+- `background.js`: shared timer, alarms, messaging, lock detection, and sound effects.
+- `presence.mjs`: reported-lock pause, fresh-focus reset on unlock, and the 2-minute gap rule.
 - `sounds.js`, `offscreen.js`: selectable sound definitions and local Web Audio playback.
 - `themes.js`, `pets.js`: palettes and original vector companions.
 - `fonts.js`, `font-data.js`: configurable typography and bundled Roboto font bytes.
@@ -229,17 +329,22 @@ wake-up, repeated automatic cycles, font preference validation, upgrade migratio
 concurrent tab requests, reminder deduplication,
 and the service worker's browser API contract using mocked Chrome APIs.
 
-All 39 automated tests passed, including simulated pointer release, window focus loss,
+All 58 automated tests passed, including simulated pointer release, window focus loss,
 free positioning, the hidden-pet expand path, synchronized ring/digit updates,
+lock/unlock resets, interrupted breaks, manual pause preservation, delayed checks,
+restart behavior, duration changes, daily counts, old automatic-pause migration,
+gap threshold boundaries, lock precedence, silent gap resets, invalid checkpoints,
 cross-tab visibility changes during dragging, keyboard focus restoration, global
 hide/show, popup save error recovery, the dependent hopping control, handle-only dragging, shared Resume/Pause/Skip actions, settings preview controls, and full-length sound playback. JavaScript syntax, package references, and font
 file integrity were checked. The redesigned companion artwork was rendered and
 visually inspected.
-Live Chrome rendering, actual audio output, and drag interactions were not
+Live Chrome rendering, actual audio output, drag interactions, and physical Mac
+lock/lid-close behavior were not
 verified in the build environment because a usable browser binary was unavailable.
 
 Implementation references:
 
+- https://developer.chrome.com/docs/extensions/reference/api/idle
 - https://developer.chrome.com/docs/extensions/reference/api/alarms
 - https://developer.chrome.com/docs/extensions/reference/api/offscreen
 

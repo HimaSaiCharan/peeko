@@ -164,9 +164,9 @@
       toast(error.message);
     }
   });
-  for (const a of document.querySelectorAll("nav a"))
+  for (const a of document.querySelectorAll('nav a[href^="#"]'))
     a.addEventListener("click", () => {
-      for (const link of document.querySelectorAll("nav a"))
+      for (const link of document.querySelectorAll('nav a[href^="#"]'))
         link.classList.toggle("selected", link === a);
     });
 })();

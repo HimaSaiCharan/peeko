@@ -758,3 +758,66 @@ test("settings preview includes widget controls and applies collapse and close t
   assert.equal(ui.data.settings.showWidget, false);
   ui.destroy();
 });
+
+test("automatic lock pauses explain the reset and disable controls until unlock", async () => {
+  const nodes = element();
+  nodes.host = element();
+  const s = settings();
+  let actions = 0;
+  const locked = {
+    ...fresh(s),
+    paused: true,
+    systemPaused: true,
+    deadline: null,
+    remaining: 100000,
+  };
+  const context = vm.createContext({
+    Date,
+    requestAnimationFrame() {
+      return 1;
+    },
+    cancelAnimationFrame() {},
+    chrome: {
+      runtime: {
+        async sendMessage(m) {
+          if (m.type === "action") actions++;
+          return { settings: s, timer: locked };
+        },
+      },
+      storage: { onChanged: { addListener() {}, removeListener() {} } },
+    },
+    FocusThemes: {
+      apply() {
+        return { label: "Hello", pet: "Spidey" };
+      },
+      pet() {
+        return "<svg/>";
+      },
+    },
+    FocusFonts: { apply() {} },
+  });
+  vm.runInContext(source("ui.js"), context);
+  const ui = context.FocusUI.mount(nodes);
+  await new Promise(setImmediate);
+  assert.equal(nodes.querySelector(".kicker").textContent, "SCREEN LOCKED");
+  assert.equal(
+    nodes.querySelector(".dial-label").textContent,
+    "fresh focus on unlock",
+  );
+  assert.equal(nodes.querySelector(".primary").disabled, true);
+  assert.equal(nodes.querySelector(".secondary").disabled, true);
+  nodes.fire("click", {
+    target: {
+      closest() {
+        return { dataset: { op: "main" } };
+      },
+    },
+  });
+  await new Promise(setImmediate);
+  assert.equal(actions, 0);
+  ui.update({ settings: s, timer: fresh(s) });
+  assert.equal(nodes.querySelector(".primary").disabled, false);
+  assert.equal(nodes.querySelector(".secondary").disabled, false);
+  assert.equal(nodes.querySelector(".time").textContent, "20:00");
+  ui.destroy();
+});

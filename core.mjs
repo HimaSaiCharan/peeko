@@ -103,7 +103,7 @@ export function reconcile(t, s, now = Date.now()) {
     out.completed = 0;
   }
   // Upgrade an older version's waiting prompt into an automatic break.
-  if (out.phase === "due") {
+  if (out.phase === "due" && !out.paused) {
     out = startBreak(out, s, now);
     event = "due";
   } else if (!out.paused && out.deadline && now >= out.deadline) {
